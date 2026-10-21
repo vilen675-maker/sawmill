@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#315c45">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sawmill">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<title>Sawmill — помощник пилорамы</title>
+</head>
+<body>
+<header><div class="brand"><span class="logo">♣</span><div><b>SAWMILL</b><small>РАСЧЁТ · РАСКРОЙ · ЗАКАЗЫ</small></div></div><span class="offline" id="network">● ГОТОВО</span></header>
+<main>
+<section class="page active" id="calc">
+<div class="heading"><div><h1>Калькулятор</h1><p>Объём бревна и выход пиломатериала</p></div><button class="unit" id="unitToggle">мм / м</button></div>
+<div class="panel">
+<div class="grid2">
+<label>Диаметр бревна, мм<input id="diameter" type="number" min="1" value="400"></label>
+<label>Длина, м<input id="length" type="number" min="0.1" step=".1" value="4"></label>
+<label>Ширина доски, мм<input id="boardWidth" type="number" min="1" value="150"></label>
+<label>Толщина доски, мм<input id="boardThickness" type="number" min="1" value="25"></label>
+<label>Ширина пропила, мм<input id="kerf" type="number" min="0" step=".1" value="3.2"></label>
+<label>Количество досок<input id="count" type="number" min="0" value="6"></label>
+</div>
+</div>
+<div class="stats"><div class="stat"><span>Объём бревна*</span><strong id="logVol">0.503 м³</strong></div><div class="stat"><span>Объём досок</span><strong id="boardVol">0.900 м³</strong></div></div>
+<div class="panel result"><span>Расчётный выход</span><strong id="yield">—</strong><div class="bar"><i id="yieldBar"></i></div><p id="waste">Расчётные отходы: —</p></div>
+<p class="note">* Объём бревна рассчитан как цилиндр. Это ориентировочная оценка без коры, конусности, обзола и дефектов. Значения объёма досок и выхода могут превышать 100% — проверь размеры.</p>
+</section>
+<section class="page" id="map">
+<div class="heading"><div><h1>Карта раскроя</h1><p>Схематичное сечение бревна</p></div></div>
+<div class="panel canvasPanel"><canvas id="cutCanvas" width="700" height="700" aria-label="Схема раскроя"></canvas><div class="legend"><span><i></i> Бревно</span><span><i class="boardKey"></i> Доски</span></div></div>
+<div class="panel">
+<label>Диаметр бревна: <b id="mapDText">400 мм</b><input id="mapD" type="range" min="150" max="900" value="400"></label>
+<label>Ширина доски: <b id="mapWText">120 мм</b><input id="mapW" type="range" min="50" max="250" value="120"></label>
+<label>Толщина доски: <b id="mapTText">25 мм</b><input id="mapT" type="range" min="15" max="75" value="25"></label>
+<label>Количество досок: <b id="mapNText">5</b><input id="mapN" type="range" min="1" max="10" value="5"></label>
+<p class="note">Это визуальная схема, а не проверенный производственный оптимизатор. Учитывайте пропил, обзол, конусность, дефекты и ограничения станка.</p>
+</div>
+</section>
+<section class="page" id="saw">
+<div class="heading"><div><h1>Помощник распиловки</h1><p>Чек-лист для текущего бревна</p></div></div>
+<div class="panel"><div class="progressLine"><b id="progressText">0 из 7 выполнено</b><span id="progressPct">0%</span></div><div class="bar"><i id="progressBar"></i></div><div id="steps"></div><button class="secondary full" id="resetSteps">Сбросить чек-лист</button></div>
+<div class="warning"><b>⚠ Безопасность</b><p>Следуйте инструкции производителя станка, используйте СИЗ и не измеряйте древесину рядом с движущимся полотном.</p></div>
+</section>
+<section class="page" id="orders">
+<div class="heading"><div><h1>Заказы</h1><p>Хранятся на этом устройстве</p></div><button class="primary" id="newOrder">＋ Добавить</button></div>
+<div id="orderList"></div>
+<div class="panel empty" id="emptyOrders"><div class="emptyIcon">▤</div><b>Пока нет заказов</b><p>Создай заказ — он сохранится на этом устройстве.</p></div>
+<div class="panel"><button class="secondary full" id="exportOrders">Экспортировать заказы (.json)</button><p class="note">Экспорт сохраняет резервную копию. Данные хранятся в браузере этого устройства.</p></div>
+</section>
+</main>
+<nav class="tabs">
+<button class="tab active" data-page="calc"><span>▦</span>Расчёт</button>
+<button class="tab" data-page="map"><span>◉</span>Карта</button>
+<button class="tab" data-page="saw"><span>⚒</span>Распил</button>
+<button class="tab" data-page="orders"><span>▤</span>Заказы</button>
+</nav>
+<dialog id="orderDialog"><form method="dialog" id="orderForm"><h2>Новый заказ</h2><label>Клиент<input id="customer" required placeholder="Имя клиента"></label><label>Описание<input id="description" value="Распил бревна"></label><label>Объём, м³<input id="orderVolume" type="number" min="0" step=".001" value=".25" required></label><div class="dialogActions"><button class="secondary" value="cancel">Отмена</button><button class="primary" id="saveOrder" value="save">Сохранить</button></div></form></dialog>
+<script src="app.js"></script>
+</body></html>
